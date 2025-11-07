@@ -1,0 +1,50 @@
+name: Angular CI for DEV
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Inject prod environment.ts
+        run: |
+          mkdir -p src/app/environments
+          echo "export const environment = {" > src/app/environments/environment.ts
+          echo "  production: true," >> src/app/environments/environment.ts
+          echo "  userPoolId: '${{ secrets.DEV_USER_POOL_ID }}'," >> src/app/environments/environment.ts
+          echo "  userPoolClientId: '${{ secrets.DEV_USER_POOL_APP_ID }}'," >> src/app/environments/environment.ts
+          echo "  baseURL: '${{ secrets.DEV_API_CUSTOM_URL }}'" >> src/app/environments/environment.ts
+          echo "};" >> src/app/environments/environment.ts
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build Angular app
+        run: npm run build -- --configuration production
+
+      - name: Archive build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: angular-dist
+          path: dist/
+      
+  deploy:
+    needs: build  # <- THIS makes deploy wait for build
+    uses: ./.github/workflows/dev-cd.yaml
+    secrets:
+      AWS_ACCESS_KEY_ID_NTU: ${{ secrets.AWS_ACCESS_KEY_ID_NTU }}
+      AWS_SECRET_ACCESS_KEY_NTU: ${{ secrets.AWS_SECRET_ACCESS_KEY_NTU }}
+      AWS_REGION_NTU: ${{ secrets.AWS_REGION_NTU }}
+      DEV_S3_BUCKET_NAME: ${{ secrets.DEV_S3_BUCKET_NAME }}
+      DEV_CLOUDFRONT_DISTRIBUTION_ID: ${{ secrets.DEV_CLOUDFRONT_DISTRIBUTION_ID }}
