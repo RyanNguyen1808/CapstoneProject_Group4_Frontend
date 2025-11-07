@@ -37,7 +37,7 @@ jobs:
         run: aws sts get-caller-identity
 
       - name: Deploy to S3
-        run: aws s3 sync dist/vessel-tracking/browser/ s3://${{ secrets.PROD_S3_BUCKET_NAME }} --delete
+        run: aws s3 sync dist/capstoneproject_group4_frontend/browser/ s3://${{ secrets.PROD_S3_BUCKET_NAME }} --delete
 
       - name: CloudFront Invalidation
         run: aws cloudfront create-invalidation --distribution-id ${{ secrets.PROD_CLOUDFRONT_DISTRIBUTION_ID }} --paths "/*"
