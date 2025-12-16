@@ -13,12 +13,17 @@ export interface GetCardsRequest {
   User_Id: string;
 }
 
+export interface GetTransactionHistoryRequest {
+  Card_Id: string;
+}
+
 @Injectable({
   providedIn: 'root',
 })
 export class Api {
   private addCard_apiUrl = `${environment.baseURL}/card/add`;
   private getCards_apiUrl = `${environment.baseURL}/card/get`;
+  private getTransactionHistory_apiUrl = `${environment.baseURL}/card/gettransactions`;
 
   constructor(private http: HttpClient) {}
 
@@ -37,5 +42,13 @@ export class Api {
     });
 
     return this.http.post<any>(this.getCards_apiUrl, payload, { headers });
+  }
+
+  getTransactionHistory(payload: GetTransactionHistoryRequest): Observable<any> {
+    const headers = new HttpHeaders({
+      'Content-Type': 'application/json',
+    });
+
+    return this.http.post<any>(this.getTransactionHistory_apiUrl, payload, { headers });
   }
 }

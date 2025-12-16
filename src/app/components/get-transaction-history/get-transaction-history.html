@@ -1,0 +1,56 @@
+<div *ngIf="!loading">
+  <div class="row justify-content-center my-5">
+    <div class="col-4">
+      <div class="row">
+        <div class="col mb-2">
+          <label for="cardId" class="form-label">Card Id:</label>
+          <input 
+          type="text" 
+          id="cardId"
+          [(ngModel)]="cardId"
+          class="form-control form-control-sm">
+        </div>
+      </div>
+      <div class="row">
+        <div class="col d-grid">
+          <button type="button" (click)="getTransactionHistory()" class="btn btn-sm btn-dark" [disabled]="loading">
+            <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true" *ngIf="loading"></span>
+            Get Transaction History
+          </button>
+        </div>
+      </div>
+      <div class="row">
+        <div class="container mt-4" *ngIf="transactions && transactions.length > 0; else noData">
+            <table class="table table-bordered table-hover table-sm">
+                <thead>
+                <tr class="text-center">
+                    <th>Transaction ID</th>
+                    <th>Card ID</th>
+                    <th>Type</th>
+                    <th>Amount</th>
+                    <th>Transaction Date</th>
+                </tr>
+                </thead>
+
+                <tbody>
+                <tr *ngFor="let tx of transactions">
+                    <td class="text-center">{{ tx.TRANSACTION_ID }}</td>
+                    <td>{{ tx.CARD_ID }}</td>
+                    <td class="text-center">{{ tx.TYPE }}</td>
+                    <td class="text-end">{{ tx.AMOUNT | number:'1.2-2' }}</td>
+                    <td class="text-center">
+                    {{ tx.TRANSACTION_DATETIME | date:'yyyy-MM-dd HH:mm:ss' }}
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+        <ng-template #noData>
+        <div class="alert alert-info text-center mt-4">
+            No transactions found.
+        </div>
+        </ng-template>
+      </div>
+    </div>
+  </div>
+</div>
