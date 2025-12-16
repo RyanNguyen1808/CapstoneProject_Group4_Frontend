@@ -9,11 +9,16 @@ export interface AddCardRequest {
   Amount: number;
 }
 
+export interface GetCardsRequest {
+  User_Id: string;
+}
+
 @Injectable({
   providedIn: 'root',
 })
 export class Api {
-  private apiUrl = `${environment.baseURL}/card/add`;
+  private addCard_apiUrl = `${environment.baseURL}/card/add`;
+  private getCards_apiUrl = `${environment.baseURL}/card/get`;
 
   constructor(private http: HttpClient) {}
 
@@ -22,6 +27,15 @@ export class Api {
       'Content-Type': 'application/json',
     });
 
-    return this.http.post<any>(this.apiUrl, payload, { headers });
+    return this.http.post<any>(this.addCard_apiUrl, payload, { headers });
+  }
+
+  getCards(payload: GetCardsRequest): Observable<any> {
+    console.log(payload);
+    const headers = new HttpHeaders({
+      'Content-Type': 'application/json',
+    });
+
+    return this.http.post<any>(this.getCards_apiUrl, payload, { headers });
   }
 }

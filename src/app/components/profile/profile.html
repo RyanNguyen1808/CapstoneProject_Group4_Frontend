@@ -22,7 +22,6 @@
           class="form-control form-control-sm">
         </div>
       </div>
-
       <div class="row">
         <div class="col d-grid">
           <button type="button" (click)="update()" class="btn btn-sm btn-dark" [disabled]="loading">
@@ -33,6 +32,31 @@
       </div>
       <div class="row">
         <strong>{{ errorMessage }}</strong>
+      </div>
+      <div class="row">
+        <div class="container mt-4" *ngIf="cards && cards.length > 0; else noData">
+          <table class="table table-bordered table-hover table-sm">
+            <thead class="table-light">
+              <tr class="text-center">
+                <th>Card ID</th>
+                <th>User ID</th>
+                <th>Balance</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let card of cards" class="text-center">
+                <td>{{ card.CARD_ID }}</td>
+                <td>{{ card.USER_ID }}</td>
+                <td>{{ card.BALANCE | number:'1.2-2' }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <ng-template #noData>
+          <div class="alert alert-info text-center mt-4">
+            No card data available.
+          </div>
+        </ng-template>
       </div>
     </div>
   </div>
