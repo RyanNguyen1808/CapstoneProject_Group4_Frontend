@@ -63,8 +63,8 @@ export class AddCard implements OnInit {
       next: (res) => {
         console.log('API response:', res);
         this.loading = false;
-        this.cdRef.detectChanges();
         this.message = res.message + " Request Id: " + res.sqs_message_id;
+        this.cdRef.detectChanges();
       },
       error: (err) => {
         console.error('API error:', err);
