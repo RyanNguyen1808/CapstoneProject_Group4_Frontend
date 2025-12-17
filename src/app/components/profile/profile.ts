@@ -39,6 +39,13 @@ export class Profile implements OnInit {
         sub: authenticatedUser.sub || ''
       };
 
+      this.cognitoService.getAuthenticatedSession()
+      .then((authenticatedSession: any) => {
+        console.log(authenticatedSession);
+        const accessToken = authenticatedSession.tokens?.accessToken?.toString();
+        const idToken     = authenticatedSession.tokens?.idToken?.toString();
+      });
+
       const payload: GetCardsRequest = {
           User_Id: this.user.sub
         };
