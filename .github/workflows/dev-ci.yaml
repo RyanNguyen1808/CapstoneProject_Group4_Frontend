@@ -6,6 +6,9 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    outputs:
+      DEV_S3_BUCKET_NAME: ${{ steps.set_outputs.outputs.DEV_S3_BUCKET_NAME }}
+      DEV_CLOUDFRONT_DISTRIBUTION_ID: ${{ steps.set_outputs.outputs.DEV_CLOUDFRONT_DISTRIBUTION_ID }}
 
     steps:
       - name: Checkout repository
@@ -44,6 +47,12 @@ jobs:
           echo "DEV_USER_POOL_APP_ID=$DEV_USER_POOL_APP_ID" >> $GITHUB_ENV
           echo "DEV_BASE_URL=$DEV_BASE_URL" >> $GITHUB_ENV
           echo "DEV_S3_BUCKET_NAME=$DEV_S3_BUCKET_NAME" >> $GITHUB_ENV
+      
+      - name: Set outputs for deploy
+        id: set_outputs
+        run: |
+          echo "DEV_S3_BUCKET_NAME=${DEV_S3_BUCKET_NAME}" >> $GITHUB_OUTPUT
+          echo "DEV_CLOUDFRONT_DISTRIBUTION_ID=${DEV_CLOUDFRONT_DISTRIBUTION_ID}" >> $GITHUB_OUTPUT
 
       - name: Inject prod environment.ts
         run: |
@@ -73,6 +82,6 @@ jobs:
     secrets:
       AWS_ACCESS_KEY_ID_NTU: ${{ secrets.AWS_ACCESS_KEY_ID_NTU }}
       AWS_SECRET_ACCESS_KEY_NTU: ${{ secrets.AWS_SECRET_ACCESS_KEY_NTU }}
-      AWS_REGION_NTU: ${{ secrets.AWS_REGION_NTU }}
-      DEV_S3_BUCKET_NAME: ${{ env.DEV_S3_BUCKET_NAME }}
-      DEV_CLOUDFRONT_DISTRIBUTION_ID: ${{ env.DEV_CLOUDFRONT_DISTRIBUTION_ID }}
+      AWS_REGION_NTU: ${{ secrets.AWS_REGION_NTU }}      
+      DEV_S3_BUCKET_NAME: ${{ needs.build.outputs.DEV_S3_BUCKET_NAME }}
+      DEV_CLOUDFRONT_DISTRIBUTION_ID: ${{ needs.build.outputs.DEV_CLOUDFRONT_DISTRIBUTION_ID }}
