@@ -24,6 +24,7 @@ jobs:
         id: ssm
         run: |
           PARAM=$(aws ssm get-parameter \
+            --region "${{ secrets.AWS_REGION_NTU }}"
             --name "${{ secrets.DEV_SSM_PARAMETER_NAME }}" \
             --with-decryption \
             --query "Parameter.Value" \
