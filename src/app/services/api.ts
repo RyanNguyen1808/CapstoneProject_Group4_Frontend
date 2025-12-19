@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { from, Observable, switchMap } from 'rxjs';
 import { environment } from '../environments/environment'; // adjust path
 import { CognitoService } from './cognito';
 
@@ -31,32 +31,48 @@ export class Api {
   ) {}
 
   addCard(payload: AddCardRequest): Observable<any> {
-    const token = this.cognitoService.getIdToken();
-    const headers = new HttpHeaders({
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${token}`,
-    });
+    return from(this.cognitoService.getIdToken()).pipe(
+      switchMap(token => {
+        if (!token) throw new Error('No ID token available');
 
-    return this.http.post<any>(this.addCard_apiUrl, payload, { headers });
+        const headers = new HttpHeaders({
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        });
+
+        return this.http.post<any>(this.addCard_apiUrl, payload, { headers });
+      })
+    );
+
   }
 
   getCards(payload: GetCardsRequest): Observable<any> {
-    const token = this.cognitoService.getIdToken();
-    const headers = new HttpHeaders({
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${token}`,
-    });
+    return from(this.cognitoService.getIdToken()).pipe(
+      switchMap(token => {
+        if (!token) throw new Error('No ID token available');
 
-    return this.http.post<any>(this.getCards_apiUrl, payload, { headers });
+        const headers = new HttpHeaders({
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        });
+
+        return this.http.post<any>(this.getCards_apiUrl, payload, { headers });
+      })
+    );
   }
 
   getTransactionHistory(payload: GetTransactionHistoryRequest): Observable<any> {
-    const token = this.cognitoService.getIdToken();
-    const headers = new HttpHeaders({
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${token}`,
-    });
+      return from(this.cognitoService.getIdToken()).pipe(
+      switchMap(token => {
+        if (!token) throw new Error('No ID token available');
 
-    return this.http.post<any>(this.getTransactionHistory_apiUrl, payload, { headers });
+        const headers = new HttpHeaders({
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        });
+
+        return this.http.post<any>(this.getTransactionHistory_apiUrl, payload, { headers });
+      })
+    );
   }
 }
