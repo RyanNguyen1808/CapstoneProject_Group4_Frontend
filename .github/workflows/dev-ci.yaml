@@ -16,15 +16,43 @@ jobs:
         with:
           node-version: 20
           cache: 'npm'
+      
+      - name: Fetch SSM parameter
+        id: ssm
+        run: |
+          PARAM=$(aws ssm get-parameter \
+            --name "${{ secrets.DEV_SSM_PARAMETER_NAME }}" \
+            --with-decryption \
+            --query "Parameter.Value" \
+            --output text)
+          echo "PARAM=$PARAM" >> $GITHUB_ENV
+
+      - name: Parse JSON and export variables
+        run: |
+          export DEV_CLOUDFRONT_DISTRIBUTION_ID=$(echo $PARAM | jq -r '.cloudfront_distribution_id')
+          export DEV_USER_POOL_ID=$(echo $PARAM | jq -r '.cognito_user_pool_id')
+          export DEV_USER_POOL_APP_ID=$(echo $PARAM | jq -r '.cognito_app_client_id')
+          export DEV_BASE_URL=$(echo $PARAM | jq -r '.base_url')
+          export DEV_S3_BUCKET_NAME=$(echo $PARAM | jq -r '.s3_bucket_name')
+          echo "DEV_CLOUDFRONT_DISTRIBUTION_ID=$DEV_CLOUDFRONT_DISTRIBUTION_ID"
+          echo "DEV_USER_POOL_ID=$DEV_USER_POOL_ID"
+          echo "DEV_USER_POOL_APP_ID=$DEV_USER_POOL_APP_ID"
+          echo "DEV_BASE_URL=$DEV_BASE_URL" 
+          echo "DEV_S3_BUCKET_NAME=$DEV_S3_BUCKET_NAME"
+          echo "DEV_CLOUDFRONT_DISTRIBUTION_ID=$DEV_CLOUDFRONT_DISTRIBUTION_ID" >> $GITHUB_ENV
+          echo "DEV_USER_POOL_ID=$DEV_USER_POOL_ID" >> $GITHUB_ENV
+          echo "DEV_USER_POOL_APP_ID=$DEV_USER_POOL_APP_ID" >> $GITHUB_ENV
+          echo "DEV_BASE_URL=$DEV_BASE_URL" >> $GITHUB_ENV
+          echo "DEV_S3_BUCKET_NAME=$DEV_S3_BUCKET_NAME" >> $GITHUB_ENV
 
       - name: Inject prod environment.ts
         run: |
           mkdir -p src/app/environments
           echo "export const environment = {" > src/app/environments/environment.ts
           echo "  production: true," >> src/app/environments/environment.ts
-          echo "  userPoolId: '${{ secrets.DEV_USER_POOL_ID }}'," >> src/app/environments/environment.ts
-          echo "  userPoolClientId: '${{ secrets.DEV_USER_POOL_APP_ID }}'," >> src/app/environments/environment.ts
-          echo "  baseURL: '${{ secrets.DEV_API_CUSTOM_URL }}'" >> src/app/environments/environment.ts
+          echo "  userPoolId: '${{ env.DEV_USER_POOL_ID }}'," >> src/app/environments/environment.ts
+          echo "  userPoolClientId: '${{ env.DEV_USER_POOL_APP_ID }}'," >> src/app/environments/environment.ts
+          echo "  baseURL: '${{ env.DEV_BASE_URL }}'" >> src/app/environments/environment.ts
           echo "};" >> src/app/environments/environment.ts
 
       - name: Install dependencies
@@ -46,5 +74,5 @@ jobs:
       AWS_ACCESS_KEY_ID_NTU: ${{ secrets.AWS_ACCESS_KEY_ID_NTU }}
       AWS_SECRET_ACCESS_KEY_NTU: ${{ secrets.AWS_SECRET_ACCESS_KEY_NTU }}
       AWS_REGION_NTU: ${{ secrets.AWS_REGION_NTU }}
-      DEV_S3_BUCKET_NAME: ${{ secrets.DEV_S3_BUCKET_NAME }}
-      DEV_CLOUDFRONT_DISTRIBUTION_ID: ${{ secrets.DEV_CLOUDFRONT_DISTRIBUTION_ID }}
+      DEV_S3_BUCKET_NAME: ${{ env.DEV_S3_BUCKET_NAME }}
+      DEV_CLOUDFRONT_DISTRIBUTION_ID: ${{ env.DEV_CLOUDFRONT_DISTRIBUTION_ID }}
