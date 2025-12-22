@@ -156,4 +156,22 @@ public async getUser(): Promise<any> {
         return null;
       }
   }
+
+  public async getIdToken(): Promise<string | null> {
+  try {
+    const session = await fetchAuthSession();
+    return session.tokens?.idToken?.toString() ?? null;
+  } catch {
+    return null;
+  }
+  }
+
+  public async getAccessToken(): Promise<string | null> {
+  try {
+    const session = await fetchAuthSession();
+    return session.tokens?.accessToken?.toString() ?? null;
+  } catch {
+    return null;
+  }
+  }
 }

@@ -18,6 +18,12 @@
           <a class="nav-link" routerLink="/profile" routerLinkActive="active" *ngIf="isAuthenticated">Profile</a>
         </li>
         <li class="nav-item">
+          <a class="nav-link" routerLink="/addcard" routerLinkActive="active" *ngIf="isAuthenticated">Add Card</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" routerLink="/transactions" routerLinkActive="active" *ngIf="isAuthenticated">Get Transactions</a>
+        </li>
+        <li class="nav-item">
           <a class="nav-link" routerLink="" (click)="signOut()" *ngIf="isAuthenticated">Sign out</a>
         </li>
       </ul>

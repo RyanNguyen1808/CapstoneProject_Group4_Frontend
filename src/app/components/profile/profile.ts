@@ -2,6 +2,7 @@ import { Component, OnInit, ChangeDetectorRef  } from '@angular/core';
 import { CognitoService } from '../../services/cognito'
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
+import { Api, GetCardsRequest } from '../../services/api';
 
 @Component({
   selector: 'app-profile',
@@ -13,13 +14,16 @@ export class Profile implements OnInit {
   loading: boolean;
   user: any;
   errorMessage: string;
+  cards: any[] = [];
   constructor(private cognitoService: CognitoService,
-              private cdRef: ChangeDetectorRef
+              private cdRef: ChangeDetectorRef,
+              private api: Api
   ) {
     this.loading = false;
     this.user = {
                   email: '', 
-                  name: '', 
+                  name: '',
+                  sub: ''
                 };
     this.errorMessage = '';
   }
@@ -28,11 +32,36 @@ export class Profile implements OnInit {
     this.loading = true;
     this.cognitoService.getUser()
     .then((authenticatedUser: any) => {
-      
+      console.log(authenticatedUser);
       this.user = {
         email: authenticatedUser.email || '',
-        name: authenticatedUser.name || ''
+        name: authenticatedUser.name || '',
+        sub: authenticatedUser.sub || ''
       };
+
+      this.cognitoService.getAuthenticatedSession()
+      .then((authenticatedSession: any) => {
+        console.log(authenticatedSession);
+        const accessToken = authenticatedSession.tokens?.accessToken?.toString();
+        const idToken     = authenticatedSession.tokens?.idToken?.toString();
+      });
+
+      const payload: GetCardsRequest = {
+          User_Id: this.user.sub
+        };
+      this.api.getCards(payload).subscribe({
+        next: (res) => {
+          console.log('API response:', res);
+          this.loading = false;
+          this.cards = res;
+          this.cdRef.detectChanges();
+        },
+        error: (err) => {
+          console.error('API error:', err);
+          this.loading = false;
+          this.cdRef.detectChanges();
+        },
+      });
     })
     .catch((error: any) => {
       console.error('Error fetching user data:', error);
@@ -43,7 +72,6 @@ export class Profile implements OnInit {
       this.cdRef.detectChanges();
     });
   }
-
   public update(): void {
     this.loading = true;
 
