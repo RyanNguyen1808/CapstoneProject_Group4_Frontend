@@ -61,7 +61,6 @@ export class AddCard implements OnInit {
 
     this.api.addCard(payload).subscribe({
       next: (res) => {
-        console.log('API response:', res);
         this.loading = false;
         this.message = res.message + " Request Id: " + res.sqs_message_id;
         this.cdRef.detectChanges();
