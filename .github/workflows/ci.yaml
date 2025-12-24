@@ -1,4 +1,4 @@
-name: Angular CI for DEV
+name: Angular CI
 
 on:
   workflow_dispatch:
