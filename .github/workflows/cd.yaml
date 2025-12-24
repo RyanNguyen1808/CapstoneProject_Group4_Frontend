@@ -1,4 +1,4 @@
-name: Angular CD for DEV(Callable)
+name: Angular CD
 
 on:
   workflow_call:
