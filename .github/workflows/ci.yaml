@@ -7,8 +7,8 @@ jobs:
   build:
     runs-on: ubuntu-latest
     outputs:
-      DEV_S3_BUCKET_NAME: ${{ steps.set_outputs.outputs.DEV_S3_BUCKET_NAME }}
-      DEV_CLOUDFRONT_DISTRIBUTION_ID: ${{ steps.set_outputs.outputs.DEV_CLOUDFRONT_DISTRIBUTION_ID }}
+      S3_BUCKET_NAME: ${{ steps.set_outputs.outputs.S3_BUCKET_NAME }}
+      CLOUDFRONT_DISTRIBUTION_ID: ${{ steps.set_outputs.outputs.CLOUDFRONT_DISTRIBUTION_ID }}
 
     steps:
       - name: Checkout repository
@@ -32,7 +32,7 @@ jobs:
         run: |
           PARAM=$(aws ssm get-parameter \
             --region "${{ secrets.AWS_REGION_NTU }}" \
-            --name "${{ secrets.DEV_SSM_PARAMETER_NAME }}" \
+            --name "${{ secrets.SSM_PARAMETER_NAME }}" \
             --with-decryption \
             --query "Parameter.Value" \
             --output text)
@@ -40,36 +40,36 @@ jobs:
 
       - name: Parse JSON and export variables
         run: |
-          export DEV_CLOUDFRONT_DISTRIBUTION_ID=$(echo $PARAM | jq -r '.cloudfront_distribution_id')
-          export DEV_USER_POOL_ID=$(echo $PARAM | jq -r '.cognito_user_pool_id')
-          export DEV_USER_POOL_APP_ID=$(echo $PARAM | jq -r '.cognito_app_client_id')
-          export DEV_BASE_URL=$(echo $PARAM | jq -r '.base_url')
-          export DEV_S3_BUCKET_NAME=$(echo $PARAM | jq -r '.s3_bucket_name')
-          echo "DEV_CLOUDFRONT_DISTRIBUTION_ID=$DEV_CLOUDFRONT_DISTRIBUTION_ID"
-          echo "DEV_USER_POOL_ID=$DEV_USER_POOL_ID"
-          echo "DEV_USER_POOL_APP_ID=$DEV_USER_POOL_APP_ID"
-          echo "DEV_BASE_URL=$DEV_BASE_URL" 
-          echo "DEV_S3_BUCKET_NAME=$DEV_S3_BUCKET_NAME"
-          echo "DEV_CLOUDFRONT_DISTRIBUTION_ID=$DEV_CLOUDFRONT_DISTRIBUTION_ID" >> $GITHUB_ENV
-          echo "DEV_USER_POOL_ID=$DEV_USER_POOL_ID" >> $GITHUB_ENV
-          echo "DEV_USER_POOL_APP_ID=$DEV_USER_POOL_APP_ID" >> $GITHUB_ENV
-          echo "DEV_BASE_URL=$DEV_BASE_URL" >> $GITHUB_ENV
-          echo "DEV_S3_BUCKET_NAME=$DEV_S3_BUCKET_NAME" >> $GITHUB_ENV
+          export CLOUDFRONT_DISTRIBUTION_ID=$(echo $PARAM | jq -r '.cloudfront_distribution_id')
+          export USER_POOL_ID=$(echo $PARAM | jq -r '.cognito_user_pool_id')
+          export USER_POOL_APP_ID=$(echo $PARAM | jq -r '.cognito_app_client_id')
+          export BASE_URL=$(echo $PARAM | jq -r '.base_url')
+          export S3_BUCKET_NAME=$(echo $PARAM | jq -r '.s3_bucket_name')
+          echo "CLOUDFRONT_DISTRIBUTION_ID=$CLOUDFRONT_DISTRIBUTION_ID"
+          echo "USER_POOL_ID=$USER_POOL_ID"
+          echo "USER_POOL_APP_ID=$USER_POOL_APP_ID"
+          echo "BASE_URL=$BASE_URL" 
+          echo "S3_BUCKET_NAME=$S3_BUCKET_NAME"
+          echo "CLOUDFRONT_DISTRIBUTION_ID=$CLOUDFRONT_DISTRIBUTION_ID" >> $GITHUB_ENV
+          echo "USER_POOL_ID=$USER_POOL_ID" >> $GITHUB_ENV
+          echo "USER_POOL_APP_ID=$USER_POOL_APP_ID" >> $GITHUB_ENV
+          echo "BASE_URL=$BASE_URL" >> $GITHUB_ENV
+          echo "S3_BUCKET_NAME=$S3_BUCKET_NAME" >> $GITHUB_ENV
       
       - name: Set outputs for deploy
         id: set_outputs
         run: |
-          echo "DEV_S3_BUCKET_NAME=${DEV_S3_BUCKET_NAME}" >> $GITHUB_OUTPUT
-          echo "DEV_CLOUDFRONT_DISTRIBUTION_ID=${DEV_CLOUDFRONT_DISTRIBUTION_ID}" >> $GITHUB_OUTPUT
+          echo "S3_BUCKET_NAME=${S3_BUCKET_NAME}" >> $GITHUB_OUTPUT
+          echo "CLOUDFRONT_DISTRIBUTION_ID=${CLOUDFRONT_DISTRIBUTION_ID}" >> $GITHUB_OUTPUT
 
       - name: Inject prod environment.ts
         run: |
           mkdir -p src/app/environments
           echo "export const environment = {" > src/app/environments/environment.ts
           echo "  production: true," >> src/app/environments/environment.ts
-          echo "  userPoolId: '${{ env.DEV_USER_POOL_ID }}'," >> src/app/environments/environment.ts
-          echo "  userPoolClientId: '${{ env.DEV_USER_POOL_APP_ID }}'," >> src/app/environments/environment.ts
-          echo "  baseURL: '${{ env.DEV_BASE_URL }}'" >> src/app/environments/environment.ts
+          echo "  userPoolId: '${{ env.USER_POOL_ID }}'," >> src/app/environments/environment.ts
+          echo "  userPoolClientId: '${{ env.USER_POOL_APP_ID }}'," >> src/app/environments/environment.ts
+          echo "  baseURL: '${{ env.BASE_URL }}'" >> src/app/environments/environment.ts
           echo "};" >> src/app/environments/environment.ts
 
       - name: Install dependencies
@@ -86,10 +86,10 @@ jobs:
       
   deploy:
     needs: build  # <- THIS makes deploy wait for build
-    uses: ./.github/workflows/dev-cd.yaml
+    uses: ./.github/workflows/cd.yaml
     secrets:
       AWS_ACCESS_KEY_ID_NTU: ${{ secrets.AWS_ACCESS_KEY_ID_NTU }}
       AWS_SECRET_ACCESS_KEY_NTU: ${{ secrets.AWS_SECRET_ACCESS_KEY_NTU }}
       AWS_REGION_NTU: ${{ secrets.AWS_REGION_NTU }}      
-      DEV_S3_BUCKET_NAME: ${{ needs.build.outputs.DEV_S3_BUCKET_NAME }}
-      DEV_CLOUDFRONT_DISTRIBUTION_ID: ${{ needs.build.outputs.DEV_CLOUDFRONT_DISTRIBUTION_ID }}
+      S3_BUCKET_NAME: ${{ needs.build.outputs.S3_BUCKET_NAME }}
+      CLOUDFRONT_DISTRIBUTION_ID: ${{ needs.build.outputs.CLOUDFRONT_DISTRIBUTION_ID }}
